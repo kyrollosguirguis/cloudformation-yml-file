@@ -1,0 +1,68 @@
+Parameters:
+  Vpc-kiro:
+    Description: VPC
+    Type: String
+  PublicSubName:
+    Description: Public_Subnet
+    Type: String
+  PrivateSubName:
+    Description: Private_Subnet
+    Type: String 
+  InstanceName:
+    Description: Instance
+    Type: String
+  SecGroupName:
+    Description: Security_Group
+    Type: String 
+Resources:
+  Vpc-kiro:
+    Type: "AWS::EC2::VPC"
+    Properties:
+      CidrBlock: "192.168.0.0/16"
+      Tags:
+        - Key: Name
+          Value: !Ref Vpc-kiro
+  PublicSubnet:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone: "eu-north-1b" 
+      VpcId: !Ref Vpc-kiro
+      CidrBlock: "192.168.0.0/24"
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Ref PublicSubName
+  PrivateSubnet:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone: "eu-north-1b" 
+      VpcId: !Ref Vpc-kiro
+      CidrBlock: "192.168.0.1/24"
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Ref PrivateSubName
+  MySecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Allow SSH and HTTP access"
+      VpcId: !Ref Vpc-kiro
+      SecurityGroupIngress:
+        - IpProtocol: "tcp"
+          FromPort: 22
+          ToPort: 22
+          CidrIp: "0.0.0.0/0"
+        - IpProtocol: "tcp"
+          FromPort: 80
+          ToPort: 80
+          CidrIp: "0.0.0.0/0"
+  
+  MyEC2Instance:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      ImageId: "ami-06b8a1ca860d68ef6"
+      InstanceType: "t2.micro"
+      KeyName: "ec2-kiro"
+      SubnetId: !Ref PublicSubnet
+      SecurityGroupIds:
+        - !Ref MySecurityGroup
